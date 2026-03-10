@@ -72,7 +72,7 @@ class MolecularGNN(nn.Module):
 
         # 图级别readout (平均池化)
         # 创建mask来标记有效的原子
-        num_atoms_tensor = torch.tensor(num_atoms, device=x.device, dtype=torch.float)
+        num_atoms_tensor = x.new_tensor(num_atoms, dtype=torch.float)  # 更高效的tensor创建
         max_atoms_range = torch.arange(max_atoms, device=x.device).float()
         mask = (max_atoms_range.unsqueeze(0) < num_atoms_tensor.unsqueeze(1)).unsqueeze(-1)  # [batch, max_atoms, 1]
 
