@@ -1,128 +1,100 @@
-# 🧪 Bio-AutoResearch
+# 🔬 Bio-AutoResearch
 
-基于 [karpathy/autoresearch](https://github.com/karpathy/autoresearch) 的生命科学研究版本 - AI智能体在分子性质预测上的自主研究。
+基于 [karpathy/autoresearch](https://github.com/karpathy/autoresearch) 的生命科学自主研究框架集合。
 
-## 🎯 核心思想
+## 🎯 核心概念
 
-**AI自主研究循环**: Agent修改代码 → 训练5分钟 → 评估MSE → 保留/丢弃 → 重复
+**AI自主研究循环**: Agent修改代码 → 训练5分钟 → 评估指标 → 保留/丢弃 → 重复
 
-将autoresearch从LLM训练迁移到**分子性质预测**领域。
+每个子项目将autoresearch适配到特定的生物科学领域，仅需最小修改。
 
 ## 📁 项目结构
 
 ```
-bio_autoresearch/
-├── prepare_mol.py    # 数据准备 (固定，agent不修改)
-├── train.py          # 模型+训练 (agent修改这个文件)
-├── program.md        # Agent指令 (你修改这个文件)
-├── pyproject.toml    # 依赖管理
-├── README.md         # 英文文档
-└── README_CN.md      # 中文文档 (本文件)
+Bio-AutoResearch/
+├── molecular/          # 分子性质预测 (图神经网络)
+│   ├── prepare_mol.py  # 数据生成器
+│   ├── train.py        # GNN模型+训练
+│   └── program.md      # Agent指令
+├── protein/            # 蛋白质工程 (待开发)
+├── genomic/            # 基因组学 (待开发)
+├── imaging/            # 医学影像 (待开发)
+└── README.md           # 本文件
 ```
 
 ## 🚀 快速开始
 
-### 1. 安装依赖
+### 分子性质预测 (当前可用)
+
 ```bash
-# 使用uv (推荐)
-curl -LsSf https://astral.sh/uv/install.sh | sh
+cd molecular
 uv sync
-
-# 或使用pip
-pip install torch numpy
+uv run python train.py
 ```
 
-### 2. 运行基线实验
-```bash
-python train.py
-```
+**结果**: 训练图神经网络预测分子性质
+- **模型**: 带消息传递的分子图神经网络
+- **数据**: 随机分子图
+- **指标**: Val MSE (~18.09 基线)
+- **时间**: 每次实验5分钟
 
-这将运行一个5分钟的基线训练，输出MSE结果。
+## 📊 可用领域
 
-### 3. 启动AI Agent研究
-在你的AI聊天界面 (Claude/Codex等) 中：
-1. 上传此项目文件夹
-2. 引导agent阅读 `program.md`
-3. 让agent开始自主实验
+| 领域 | 状态 | 模型 | 数据类型 | 评估指标 |
+|------|------|------|----------|----------|
+| **分子预测** | ✅ 就绪 | GNN | 图结构 | MSE |
+| **蛋白质工程** | 🚧 计划中 | Transformer/ESM | 序列 | 稳定性 |
+| **基因组学** | 🚧 计划中 | CNN/Attention | DNA/RNA | 准确率 |
+| **医学影像** | 🚧 计划中 | U-Net/ViT | 图像 | Dice/IoU |
 
-示例提示词:
-```
-请阅读program.md，然后开始第一个改进实验。
-请说明你的假设，进行修改，并运行train.py验证效果。
-```
+## 🔬 核心设计原则
 
-## 🔬 最小修改说明
-
-相比原始autoresearch，我们**仅修改了3个核心部分**:
-
-### 1️⃣ 数据层 (`prepare_mol.py`)
-- **原始**: 文本tokenizer和数据加载器
-- **现在**: 分子图数据生成器
-- **关键**: 简化的分子数据集 (随机图+启发式目标)
-
-### 2️⃣ 模型层 (`train.py`)
-- **原始**: GPT语言模型
-- **现在**: Molecular GNN (图神经网络)
-- **关键**: 消息传递机制 → 图级别表示 → 性质预测
-
-### 3️⃣ Agent指令 (`program.md`)
-- **原始**: LLM训练优化建议
-- **现在**: 分子性质预测改进方向
-- **关键**: GNN架构、图学习技术、损失函数设计
-
-## 📊 评估指标
-
-| 原始autoresearch | Bio-autoresearch |
-|-----------------|------------------|
-| val_bpb (bits per byte) | val_mse (mean squared error) |
-| 越低越好 | 越低越好 |
-| 衡量语言建模 | 衡量分子性质预测 |
-
-## 🎨 设计原则 (保持不变)
+所有子项目遵循相同的极简设计：
 
 ✅ **5分钟时间预算** - 所有实验运行时间相同
-✅ **单文件修改** - Agent只修改train.py
+✅ **单文件修改** - Agent只修改 `train.py`
 ✅ **自包含** - 最小外部依赖
 ✅ **可审查diffs** - 每次改动清晰可追踪
-✅ **单一指标** - MSE作为唯一优化目标
+✅ **单一指标** - 每个领域一个优化目标
 
-## 🔮 扩展方向
+## 🎨 最小修改策略
 
-基于这个框架，可以轻松扩展到其他bio领域:
+每个领域相比原始autoresearch仅需修改**3个核心组件**：
 
-### 蛋白质工程
-- 修改数据: 蛋白质序列 → 结构
-- 修改模型: Transformer/ESM
-- 修改指标: 稳定性/结合能
+1. **数据层** - 特定领域的数据生成器
+2. **模型层** - 适当的神经网络架构
+3. **Agent指令** - 特定领域的改进策略
 
-### 基因组学
-- 修改数据: DNA序列 → 表达数据
-- 修改模型: CNN/Attention
-- 修改指标: 分类准确率
+## 📝 文档
 
-### 医学影像
-- 修改数据: 图像数据
-- 修改模型: U-Net/ViT
-- 修改指标: Dice系数/IoU
+- [分子性质预测](molecular/README_CN.md) - 当前实现的详细指南
+- [README.md](README.md) - English version
 
-## 📝 预期结果
+## 🚀 扩展到新领域
 
-运行一整夜 (~100次实验) 后，你将获得:
-- 📈 实验历史记录
+添加新的生物领域：
+
+1. **创建子目录**: `mkdir your_domain/`
+2. **适配3个文件**:
+   - `prepare_*.py` - 数据生成器
+   - `train.py` - 模型架构
+   - `program.md` - Agent指令
+3. **保持设计** - 5分钟预算、单文件修改、单一指标
+
+参考 [molecular/](molecular/) 作为实现示例。
+
+## 📈 预期结果
+
+运行自主研究一整夜 (~100次实验) 后获得：
+- 📊 实验历史记录
 - 🏆 最佳模型配置
-- 💡 有效的改进策略
-- 📊 性能提升曲线
-
-## 📚 文档
-
-- `README.md` - [English Version](README.md) (英文文档)
-- `QUICK_START.md` - 快速开始指南（详细对比）
-- `MINIMAL_CHANGES.md` - 最小修改分析文档
+- 💡 有效策略
+- 📈 性能提升
 
 ## 🙏 致谢
 
 - [Andrej Karpathy](https://github.com/karpathy) - 原始autoresearch概念
-- [PyTorch Geometric](https://pyg.org/) - 图神经网络灵感
+- PyTorch Geometric - 图神经网络灵感
 
 ## 📄 许可证
 
@@ -130,4 +102,4 @@ MIT License
 
 ---
 
-**准备好了吗？让AI开始自主的生物研究吧！** 🚀🧬
+**准备好开始自主生物研究了吗？** 选择一个领域开始吧！🧬🚀

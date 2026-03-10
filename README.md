@@ -1,127 +1,100 @@
-# 🧪 Bio-AutoResearch
+# 🔬 Bio-AutoResearch
 
-Bio-science adaptation of [karpathy/autoresearch](https://github.com/karpathy/autoresearch) - AI agents running autonomous research on molecular property prediction.
+A collection of minimalist autonomous research frameworks for bio-science domains, inspired by [karpathy/autoresearch](https://github.com/karpathy/autoresearch).
 
-## 🎯 Core Concept
+## 🎯 Concept
 
-**AI Autonomous Research Loop**: Agent modifies code → trains for 5 minutes → evaluates MSE → keeps/discards → repeats
+**AI Autonomous Research Loop**: Agent modifies code → trains for 5 minutes → evaluates metrics → keeps/discards → repeats
 
-Adapts autoresearch from LLM training to **molecular property prediction** domain.
+Each sub-project adapts autoresearch to a specific bio-science domain with minimal modifications.
 
 ## 📁 Project Structure
 
 ```
-bio_autoresearch/
-├── prepare_mol.py    # Data preparation (fixed, agent does not modify)
-├── train.py          # Model + training (agent modifies this file)
-├── program.md        # Agent instructions (you modify this file)
-├── pyproject.toml    # Dependency management
-└── README.md         # This file
+Bio-AutoResearch/
+├── molecular/          # Molecular property prediction (GNN)
+│   ├── prepare_mol.py  # Data generation
+│   ├── train.py        # GNN model + training
+│   └── program.md      # Agent instructions
+├── protein/            # Protein engineering (TODO)
+├── genomic/            # Genomics (TODO)
+├── imaging/            # Medical imaging (TODO)
+└── README.md           # This file
 ```
 
 ## 🚀 Quick Start
 
-### 1. Install Dependencies
+### Molecular Property Prediction (Current)
+
 ```bash
-# Using uv (recommended)
-curl -LsSf https://astral.sh/uv/install.sh | sh
+cd molecular
 uv sync
-
-# Or using pip
-pip install torch numpy
+uv run python train.py
 ```
 
-### 2. Run Baseline Experiment
-```bash
-python train.py
-```
+**Result**: Train a Graph Neural Network to predict molecular properties.
+- **Model**: Molecular GNN with message passing
+- **Data**: Random molecular graphs
+- **Metric**: Val MSE (~18.09 baseline)
+- **Time**: 5 minutes per experiment
 
-This runs a 5-minute baseline training and outputs MSE results.
+## 📊 Available Domains
 
-### 3. Launch AI Agent Research
-In your AI chat interface (Claude/Codex/etc.):
-1. Upload this project folder
-2. Guide the agent to read `program.md`
-3. Let the agent start autonomous experimentation
+| Domain | Status | Model | Data Type | Metric |
+|--------|--------|-------|-----------|--------|
+| **Molecular** | ✅ Ready | GNN | Graphs | MSE |
+| **Protein** | 🚧 Planned | Transformer/ESM | Sequences | Stability |
+| **Genomic** | 🚧 Planned | CNN/Attention | DNA/RNA | Accuracy |
+| **Imaging** | 🚧 Planned | U-Net/ViT | Images | Dice/IoU |
 
-Example prompt:
-```
-Please read program.md and start the first improvement experiment.
-Explain your hypothesis, make modifications, and run train.py to verify results.
-```
+## 🔬 Core Design Principles
 
-## 🔬 Minimal Modifications
-
-Compared to the original autoresearch, we **only modified 3 core components**:
-
-### 1️⃣ Data Layer (`prepare_mol.py`)
-- **Original**: Text tokenizer and data loader
-- **Now**: Molecular graph data generator
-- **Key**: Simplified molecular dataset (random graphs + heuristic targets)
-
-### 2️⃣ Model Layer (`train.py`)
-- **Original**: GPT language model
-- **Now**: Molecular GNN (Graph Neural Network)
-- **Key**: Message passing mechanism → graph-level representation → property prediction
-
-### 3️⃣ Agent Instructions (`program.md`)
-- **Original**: LLM training optimization suggestions
-- **Now**: Molecular property prediction improvement directions
-- **Key**: GNN architectures, graph learning techniques, loss function design
-
-## 📊 Evaluation Metrics
-
-| Original autoresearch | Bio-autoresearch |
-|----------------------|------------------|
-| val_bpb (bits per byte) | val_mse (mean squared error) |
-| Lower is better | Lower is better |
-| Measures language modeling | Measures molecular property prediction |
-
-## 🎨 Design Principles (Preserved)
+All sub-projects follow the same minimalist design:
 
 ✅ **5-minute time budget** - All experiments run for same duration
-✅ **Single file modification** - Agent only modifies train.py
+✅ **Single file modification** - Agent only modifies `train.py`
 ✅ **Self-contained** - Minimal external dependencies
 ✅ **Reviewable diffs** - Every change clearly traceable
-✅ **Single metric** - MSE as sole optimization target
+✅ **Single metric** - One optimization target per domain
 
-## 🔮 Extension Directions
+## 🎨 Minimal Modifications
 
-Based on this framework, easily extend to other bio domains:
+Each domain requires only **3 component changes** from original autoresearch:
 
-### Protein Engineering
-- Modify data: Protein sequences → structures
-- Modify model: Transformer/ESM
-- Modify metric: Stability/binding energy
+1. **Data Layer** - Domain-specific data generator
+2. **Model Layer** - Appropriate neural architecture
+3. **Agent Instructions** - Domain-specific improvement strategies
 
-### Genomics
-- Modify data: DNA sequences → expression data
-- Modify model: CNN/Attention
-- Modify metric: Classification accuracy
+## 📝 Documentation
 
-### Medical Imaging
-- Modify data: Image data
-- Modify model: U-Net/ViT
-- Modify metric: Dice coefficient/IoU
+- [Molecular Property Prediction](molecular/README.md) - Detailed guide for current implementation
+- [中文文档](README_CN.md) - Chinese version
 
-## 📝 Expected Results
+## 🚀 Extending to New Domains
 
-After running overnight (~100 experiments), you will gain:
-- 📈 Experiment history log
+To add a new bio domain:
+
+1. **Create subdirectory**: `mkdir your_domain/`
+2. **Adapt 3 files**:
+   - `prepare_*.py` - Data generator
+   - `train.py` - Model architecture
+   - `program.md` - Agent instructions
+3. **Keep design** - 5-minute budget, single file mod, one metric
+
+See [molecular/](molecular/) as reference implementation.
+
+## 📈 Expected Results
+
+Running autonomous research overnight (~100 experiments) yields:
+- 📊 Experiment history
 - 🏆 Best model configuration
-- 💡 Effective improvement strategies
-- 📊 Performance improvement curve
-
-## 📚 Documentation
-
-- `README_CN.md` - [中文文档](README_CN.md) (Chinese version)
-- `QUICK_START.md` - Quick start guide with detailed comparisons
-- `MINIMAL_CHANGES.md` - Minimal change analysis document
+- 💡 Effective strategies
+- 📈 Performance improvements
 
 ## 🙏 Acknowledgments
 
 - [Andrej Karpathy](https://github.com/karpathy) - Original autoresearch concept
-- [PyTorch Geometric](https://pyg.org/) - Graph neural network inspiration
+- PyTorch Geometric - Graph neural network inspiration
 
 ## 📄 License
 
@@ -129,4 +102,4 @@ MIT License
 
 ---
 
-**Ready? Let AI start autonomous bio research!** 🚀🧬
+**Ready to start autonomous bio research?** Pick a domain and begin! 🧬🚀
