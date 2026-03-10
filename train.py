@@ -55,11 +55,10 @@ class MolecularGNN(nn.Module):
 
         # 消息传递
         for i, gnn_layer in enumerate(self.gnn_layers):
-            # 计算消息聚合
-            adjacency = adj.unsqueeze(-1)  # [batch, max_atoms, max_atoms, 1]
-
-            # 聚合邻居信息
-            messages = torch.matmul(adjacency, x)  # [batch, max_atoms, hidden_dim]
+            # 聚合邻居信息 (使用bmm进行批量矩阵乘法)
+            # adj: [batch, max_atoms, max_atoms]
+            # x: [batch, max_atoms, hidden_dim]
+            messages = torch.bmm(adj, x)  # [batch, max_atoms, hidden_dim]
 
             # 归一化 (考虑度)
             degree = adj.sum(dim=-1, keepdim=True).clamp(min=1)  # [batch, max_atoms, 1]
@@ -72,11 +71,14 @@ class MolecularGNN(nn.Module):
                 x = torch.relu(x)
 
         # 图级别readout (平均池化)
-        mask = torch.arange(max_atoms, device=x.device).expand(batch_size, max_atoms)
-        mask = (mask < torch.tensor(num_atoms, device=x.device).unsqueeze(1)).unsqueeze(-1)
+        # 创建mask来标记有效的原子
+        num_atoms_tensor = torch.tensor(num_atoms, device=x.device, dtype=torch.float)
+        max_atoms_range = torch.arange(max_atoms, device=x.device).float()
+        mask = (max_atoms_range.unsqueeze(0) < num_atoms_tensor.unsqueeze(1)).unsqueeze(-1)  # [batch, max_atoms, 1]
 
-        x_masked = x * mask
-        graph_repr = x_masked.sum(dim=1) / torch.tensor(num_atoms, device=x.device).unsqueeze(1).unsqueeze(1).float()
+        # 应用mask并进行平均池化
+        x_masked = x * mask  # [batch, max_atoms, hidden_dim]
+        graph_repr = x_masked.sum(dim=1) / num_atoms_tensor.unsqueeze(1)  # [batch, hidden_dim]
 
         # 输出预测
         output = self.output_projection(graph_repr)  # [batch, 1]
