@@ -1,0 +1,4 @@
+# UV配置 - 使用清华源
+[pip]
+index-url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+extra-index-url = []
