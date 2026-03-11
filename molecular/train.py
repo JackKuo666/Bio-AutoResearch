@@ -72,9 +72,9 @@ class MolecularGNN(nn.Module):
 
         # 图级别readout (平均池化)
         # 创建mask来标记有效的原子
-        # 确保num_atoms转换为tensor而不产生warning
+        # 确保num_atoms转换为tensor而不产生warning，并确保在正确设备上
         if isinstance(num_atoms, torch.Tensor):
-            num_atoms_tensor = num_atoms.float()
+            num_atoms_tensor = num_atoms.float().to(x.device)
         else:
             num_atoms_tensor = torch.tensor(num_atoms, device=x.device, dtype=torch.float)
         max_atoms_range = torch.arange(max_atoms, device=x.device).float()
@@ -91,7 +91,7 @@ class MolecularGNN(nn.Module):
 
 # ============ 训练设置 (Agent可修改) ============
 # 学习率和优化器
-LEARNING_RATE = 1e-3
+LEARNING_RATE = 5e-4  # 实验1: 降低学习率以提高稳定性
 WEIGHT_DECAY = 1e-5
 
 # 训练超参数
